@@ -54,13 +54,16 @@ train_cat_count = cat_count_train(train, cat_list)
 print("cat count shape:", train_cat_count.shape)
 
 X = sparse.hstack([train_num, train_ohe, train_cat_count]).tocsr()
+X = X[0:330000, 0:18]
 print(X.shape)
+train_label = train_label[0:330000]
 
 params = {"objective": "binary",
           "boosting_type": "rgf",
+          # "boosting_type": "gbdt",
           "learning_rate": learning_rate,
           "num_leaves": int(num_leaves),
-          "max_bin": 256,
+          "max_bin": 128,
           "min_data_in_leaf": min_data_in_leaf,
           "feature_fraction": feature_fraction,
           "verbosity": 1,
@@ -89,6 +92,9 @@ for s in range(1):
         fold_scores = []
 
         for i, (train_fold, validate) in enumerate(kf):
+            print(str(i) + "th round.")
+            if i <= 0:
+                continue
             X_train, X_validate, label_train, label_validate = \
                 X[train_fold, :], X[validate, :], train_label[train_fold], train_label[validate]
             dtrain = lgbm.Dataset(X_train, label_train)
