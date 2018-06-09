@@ -97,18 +97,24 @@ for s in range(iter_num):
             print(str(i) + "th round.")
             if i >= 1:
                 continue
+
+            # validate = validate[:20000]
+
             X_train, X_validate, label_train, label_validate = \
                 X[train_fold, :], X[validate, :], train_label[train_fold], train_label[validate]
-            rgf = RGFClassifier(max_leaf=500,
+
+            rgf = RGFClassifier(max_leaf=1000,
                                 l2=0.01,
-                                min_samples_leaf=20,
-                                opt_interval=100,
-                                )
+                                min_samples_leaf=2000,
+                                opt_interval=100)
             # rgf = FastRGFClassifier()
-            # rgf = RandomForestClassifier()
-            # rgf.fit(X_train, label_train)
-            rgf.fit(X_validate, label_validate)
-            rgf.fit(X_validate[:40000, :], label_validate[:40000])
+            rgf = RandomForestClassifier(n_estimators=100,
+                                         min_samples_leaf=2000,
+                                         # min_weight_fraction_leaf=150,
+                                         n_jobs=6)
+            rgf.fit(X_train, label_train)
+            # rgf.fit(X_validate, label_validate)
+            # rgf.fit(X_validate[:40000, :], label_validate[:40000])
             cv_train[validate] += rgf.predict(X_validate)
 
             score = Gini(label_validate, cv_train[validate])
